@@ -112,6 +112,7 @@ public class GridController : MonoBehaviour {
             canvas.SetActive(false);
             //player.transform.position = startItem.transform.position + Vector3.up * player.defaultPosition.y;
             player.UpdatePosition(startItem);
+            player.transform.position = player.targetPosition;
             player.X = startItem.X;
             player.Y = startItem.Y;
             player.gameObject.SetActive(true);
