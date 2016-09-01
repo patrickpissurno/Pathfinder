@@ -4,9 +4,11 @@ using System.Collections;
 public class GridItem : MonoBehaviour {
     private static Material Dirt = null;
     private static Material Wall = null;
+    private static Material StartM = null;
+    private static Material EndM = null;
 
     public GridController father;
-    public bool IsWall = false;
+    public ITEM_TYPE itemType = ITEM_TYPE.Dirt;
     public int X;
     public int Y;
 
@@ -22,7 +24,24 @@ public class GridItem : MonoBehaviour {
     {
         LoadResources();
         LoadComponents();
-        renderer.material = IsWall ? Wall : Dirt;
+        Material m = null;
+        switch (itemType)
+        {
+            case ITEM_TYPE.Dirt:
+                m = Dirt;
+                break;
+            case ITEM_TYPE.Wall:
+                m = Wall;
+                break;
+            case ITEM_TYPE.Start:
+                m = StartM;
+                break;
+            case ITEM_TYPE.End:
+                m = EndM;
+                break;
+        }
+        if(m != null)
+            renderer.material = m;
     }
 
     void OnMouseDown()
@@ -36,11 +55,23 @@ public class GridItem : MonoBehaviour {
             Dirt = Resources.Load<Material>("Materials/Dirt");
         if (Wall == null)
             Wall = Resources.Load<Material>("Materials/Wall");
+        if (StartM == null)
+            StartM = Resources.Load<Material>("Materials/Start");
+        if (EndM == null)
+            EndM = Resources.Load<Material>("Materials/End");
     }
 
     void LoadComponents()
     {
         if(renderer == null)
             renderer = GetComponent<MeshRenderer>();
+    }
+
+    public enum ITEM_TYPE
+    {
+        Dirt,
+        Wall,
+        Start,
+        End
     }
 }
