@@ -43,7 +43,9 @@ public class PlayerController : MonoBehaviour {
                 if (grid.grid[X - i][Y - j] == null)
                     continue;
                 GridItem _item = grid.grid[X - i][Y - j];
-                int G = Mathf.Abs(i) == Mathf.Abs(j) && Mathf.Abs(i) == 1 ? 14 : 10;
+                if (_item.itemType.baseWeight == -1)
+                    continue;
+                int G = Mathf.Abs(i) == Mathf.Abs(j) && Mathf.Abs(i) == 1 ? _item.itemType.baseWeight + 4 : _item.itemType.baseWeight;
                 int cost = G + CalculateH(_item);
                 Debug.Log("G: " + G + ", H: " + H + ", X: " + X + ", Y: " + Y);
                 if (smallerCoast == -1 || cost < smallerCoast)

@@ -44,37 +44,37 @@ public class GridController : MonoBehaviour {
     {
         if (!IsSimulating)
         {
-            if (i.itemType == GridItem.ITEM_TYPE.Dirt)
-                i.itemType = GridItem.ITEM_TYPE.Wall;
-            else if (i.itemType == GridItem.ITEM_TYPE.Wall)
+            if (i.itemType == GridItem.ITEM_TYPE.DIRT)
+                i.itemType = GridItem.ITEM_TYPE.WALL;
+            else if (i.itemType == GridItem.ITEM_TYPE.WALL)
             {
                 if (startItem == null)
                 {
-                    i.itemType = GridItem.ITEM_TYPE.Start;
+                    i.itemType = GridItem.ITEM_TYPE.START;
                     startItem = i;
                 }
                 else if (endItem == null)
                 {
-                    i.itemType = GridItem.ITEM_TYPE.End;
+                    i.itemType = GridItem.ITEM_TYPE.END;
                     endItem = i;
                 }
                 else
-                    i.itemType = GridItem.ITEM_TYPE.Dirt;
+                    i.itemType = GridItem.ITEM_TYPE.DIRT;
             }
-            else if (i.itemType == GridItem.ITEM_TYPE.Start)
+            else if (i.itemType == GridItem.ITEM_TYPE.START)
             {
                 if (endItem == null)
                 {
-                    i.itemType = GridItem.ITEM_TYPE.End;
+                    i.itemType = GridItem.ITEM_TYPE.END;
                     endItem = i;
                 }
                 else
-                    i.itemType = GridItem.ITEM_TYPE.Dirt;
+                    i.itemType = GridItem.ITEM_TYPE.DIRT;
                 startItem = null;
             }
-            else if (i.itemType == GridItem.ITEM_TYPE.End)
+            else if (i.itemType == GridItem.ITEM_TYPE.END)
             {
-                i.itemType = GridItem.ITEM_TYPE.Dirt;
+                i.itemType = GridItem.ITEM_TYPE.DIRT;
                 endItem = null;
             }
             i.Invalidate();
@@ -98,7 +98,7 @@ public class GridController : MonoBehaviour {
                 grid[i][j].father = this;
                 grid[i][j].X = i;
                 grid[i][j].Y = j;
-                grid[i][j].itemType = GridItem.ITEM_TYPE.Dirt;
+                grid[i][j].itemType = GridItem.ITEM_TYPE.DIRT;
                 grid[i][j].Invalidate();
             }
         }

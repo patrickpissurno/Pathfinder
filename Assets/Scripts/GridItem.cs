@@ -8,7 +8,7 @@ public class GridItem : MonoBehaviour {
     private static Material EndM = null;
 
     public GridController father;
-    public ITEM_TYPE itemType = ITEM_TYPE.Dirt;
+    public ITEM_TYPE.Item itemType = ITEM_TYPE.DIRT;
     public int X;
     public int Y;
 
@@ -25,21 +25,14 @@ public class GridItem : MonoBehaviour {
         LoadResources();
         LoadComponents();
         Material m = null;
-        switch (itemType)
-        {
-            case ITEM_TYPE.Dirt:
-                m = Dirt;
-                break;
-            case ITEM_TYPE.Wall:
-                m = Wall;
-                break;
-            case ITEM_TYPE.Start:
-                m = StartM;
-                break;
-            case ITEM_TYPE.End:
-                m = EndM;
-                break;
-        }
+        if (itemType == ITEM_TYPE.DIRT)
+            m = Dirt;
+        else if (itemType == ITEM_TYPE.WALL)
+            m = Wall;
+        else if (itemType == ITEM_TYPE.START)
+            m = StartM;
+        else if (itemType == ITEM_TYPE.END)
+            m = EndM;
         if(m != null)
             renderer.material = m;
     }
@@ -67,11 +60,28 @@ public class GridItem : MonoBehaviour {
             renderer = GetComponent<MeshRenderer>();
     }
 
-    public enum ITEM_TYPE
+    //public enum ITEM_TYPE
+    //{
+    //    Dirt,
+    //    Wall,
+    //    Start,
+    //    End
+    //}
+
+    public static class ITEM_TYPE
     {
-        Dirt,
-        Wall,
-        Start,
-        End
+        public static Item DIRT = new Item(10);
+        public static Item WALL = new Item(-1);
+        public static Item START = new Item(-1);
+        public static Item END = new Item(10);
+        public class Item
+        {
+            public int baseWeight = 10;
+            public Item(int weight)
+            {
+                this.baseWeight = weight;
+            }
+        }
     }
+
 }
