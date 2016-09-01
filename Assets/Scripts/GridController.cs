@@ -9,6 +9,7 @@ public class GridController : MonoBehaviour {
     [SerializeField]
     private PlayerController player;
 
+    private GameObject canvas;
 
     private static GameObject gridPrefab;
     public GridItem[][] grid;
@@ -20,7 +21,7 @@ public class GridController : MonoBehaviour {
 
     private const float DIST = .1f;
 
-    private bool isSimulating = false;
+    public bool IsSimulating = false;
 
 	// Use this for initialization
 	void Start () {
@@ -41,7 +42,7 @@ public class GridController : MonoBehaviour {
 
     public void GridPressed(GridItem i)
     {
-        if (!isSimulating)
+        if (!IsSimulating)
         {
             if (i.itemType == GridItem.ITEM_TYPE.Dirt)
                 i.itemType = GridItem.ITEM_TYPE.Wall;
@@ -107,12 +108,24 @@ public class GridController : MonoBehaviour {
     {
         if (startItem != null && endItem != null)
         {
-            GameObject.Find("Canvas").SetActive(false);
-            player.transform.position = startItem.transform.position + Vector3.up * player.defaultPosition.y;
+            canvas = GameObject.Find("Canvas");
+            canvas.SetActive(false);
+            //player.transform.position = startItem.transform.position + Vector3.up * player.defaultPosition.y;
+            player.UpdatePosition(startItem);
+            player.X = startItem.X;
+            player.Y = startItem.Y;
             player.gameObject.SetActive(true);
-            isSimulating = true;
+            IsSimulating = true;
+            player.StartPathfind(this);
         }
         else
             Debug.Log("You must set the starting point and the ending point for the pathfind to work");
+    }
+
+    public void StopPathfinding()
+    {
+        IsSimulating = false;
+        canvas.SetActive(true);
+        player.gameObject.SetActive(false);
     }
 }
