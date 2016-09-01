@@ -7,7 +7,7 @@ public class GridController : MonoBehaviour {
     [SerializeField]
     private Transform gridParent;
     private static GameObject gridPrefab;
-    private GridItem[][] grid;
+    public GridItem[][] grid;
 
     private const float DIST = .1f;
 
