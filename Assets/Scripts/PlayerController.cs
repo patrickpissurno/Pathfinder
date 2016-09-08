@@ -23,7 +23,7 @@ public class PlayerController : MonoBehaviour {
 
     void FixedUpdate()
     {
-        transform.position = Vector3.Lerp(transform.position, targetPosition, .05f);
+        transform.position = Vector3.Lerp(transform.position, targetPosition, .25f);
     }
 
     public void StartPathfind(GridController grid)
@@ -53,7 +53,10 @@ public class PlayerController : MonoBehaviour {
         paths.Add(new List<GridItem>());
         paths[0].Add(grid.startItem);
 
+        int EXECUTION_LIMIT = 400;
+
         bool didChange = true;
+        int limit = 0;
         while (didChange)
         {
             didChange = false;
@@ -63,33 +66,51 @@ public class PlayerController : MonoBehaviour {
                 GridItem current = path[path.Count - 1];
                 if (current == grid.endItem)
                     continue;
-                List<GridItem> nexts = PathFinderStep(current.X, current.Y);
+                List<GridItem> nexts = PathFinderStep(current.X, current.Y, path);
+                Debug.Log("NEXTS: " + DebugItems(nexts));
                 for (int i = 0; i < nexts.Count; i++)
                 {
-                    if (i == 0)
-                        didChange = true;
                     List<GridItem> newPath = path;
-                    if (i > 0)
+                    if (newPath.Contains(nexts[i]))
+                        continue;
+                    if (i != nexts.Count - 1)
                     {
                         paths.Add(new List<GridItem>(path));
                         newPath = paths[paths.Count - 1];
                     }
                     newPath.Add(nexts[i]);
+                    didChange = true;
+                    limit++;
+                    if (limit >= EXECUTION_LIMIT)
+                        break;
                 }
             }
+            limit++;
+            if (limit >= EXECUTION_LIMIT)
+                break;
         }
+
+        Debug.Log("LIMIT: " + limit);
 
         int minCost = -1;
         int minID = -1;
         for(int i = 0; i<paths.Count; i++)
         {
-            if (minCost == -1 || paths[i].Count < minCost)
+            List<GridItem> path = paths[i];
+            //if (path[path.Count - 1] != grid.endItem)
+            //    continue;
+            if (minCost == -1 || path.Count < minCost)
             {
-                minCost = paths[i].Count;
+                minCost = path.Count;
                 minID = i;
             }
+            Debug.Log(DebugItems(paths[i]));
         }
         
+        if(minID != -1)
+        {
+            Debug.Log(paths[minID].Count);
+        }
         if(minID != -1)
             StartCoroutine(Walk(paths[minID]));
     }
@@ -98,12 +119,20 @@ public class PlayerController : MonoBehaviour {
     {
         foreach (GridItem i in path)
         {
-            yield return new WaitForSeconds(1f);
+            yield return new WaitForSeconds(.25f);
             UpdatePosition(i);
         }
     }
 
-    List<GridItem> PathFinderStep(int X, int Y)
+    string DebugItems(List<GridItem> path)
+    {
+        string str = "";
+        foreach (GridItem it in path)
+            str += "(" + it.X + "," + it.Y + ")";
+        return str;
+    }
+
+    List<GridItem> PathFinderStep(int X, int Y, List<GridItem> path)
     {
         int smallerCoast = -1;
         List<GridItem> items = new List<GridItem>();
