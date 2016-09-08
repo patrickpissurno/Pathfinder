@@ -13,6 +13,8 @@ public class PlayerController : MonoBehaviour {
 
     private List<GridItem> path;
 
+    private List<List<GridItem>> paths;
+
 	void Start () {
         defaultPosition = transform.position;
         gameObject.SetActive(false);
@@ -29,7 +31,8 @@ public class PlayerController : MonoBehaviour {
         this.grid = grid;
         CancelInvoke();
         path.Clear();
-        InvokeRepeating("PathFinderStep", 1f, 1f);
+        //InvokeRepeating("PathFinderStep", 1f, 1f);
+        CalculatePaths();
     }
 
     int CalculateH(GridItem i)
@@ -42,10 +45,68 @@ public class PlayerController : MonoBehaviour {
         return H = (Mathf.Abs(grid.endItem.X - X) + Mathf.Abs(grid.endItem.Y - Y)) * 10;
     }
 
-    void PathFinderStep()
+    void CalculatePaths()
+    {
+        paths = new List<List<GridItem>>();
+        int X = grid.startItem.X;
+        int Y = grid.startItem.Y;
+        paths.Add(new List<GridItem>());
+        paths[0].Add(grid.startItem);
+
+        bool didChange = true;
+        while (didChange)
+        {
+            didChange = false;
+            List<GridItem>[] _paths = paths.ToArray();
+            foreach (List<GridItem> path in _paths)
+            {
+                GridItem current = path[path.Count - 1];
+                if (current == grid.endItem)
+                    continue;
+                List<GridItem> nexts = PathFinderStep(current.X, current.Y);
+                for (int i = 0; i < nexts.Count; i++)
+                {
+                    if (i == 0)
+                        didChange = true;
+                    List<GridItem> newPath = path;
+                    if (i > 0)
+                    {
+                        paths.Add(new List<GridItem>(path));
+                        newPath = paths[paths.Count - 1];
+                    }
+                    newPath.Add(nexts[i]);
+                }
+            }
+        }
+
+        int minCost = -1;
+        int minID = -1;
+        for(int i = 0; i<paths.Count; i++)
+        {
+            if (minCost == -1 || paths[i].Count < minCost)
+            {
+                minCost = paths[i].Count;
+                minID = i;
+            }
+        }
+        
+        if(minID != -1)
+            StartCoroutine(Walk(paths[minID]));
+    }
+
+    IEnumerator Walk(List<GridItem> path)
+    {
+        foreach (GridItem i in path)
+        {
+            yield return new WaitForSeconds(1f);
+            UpdatePosition(i);
+        }
+    }
+
+    List<GridItem> PathFinderStep(int X, int Y)
     {
         int smallerCoast = -1;
-        GridItem item = null;
+        List<GridItem> items = new List<GridItem>();
         for (int i = -1; i <= 1; i++)
         {
             for (int j = -1; j <= 1; j++)
@@ -64,25 +125,20 @@ public class PlayerController : MonoBehaviour {
 
                 int G = Mathf.Abs(i) == Mathf.Abs(j) && Mathf.Abs(i) == 1 ? _item.itemType.baseWeight + 4 : _item.itemType.baseWeight;
                 int cost = G + CalculateH(_item);
-                Debug.Log("G: " + G + ", H: " + H + ", X: " + X + ", Y: " + Y);
+
                 if (smallerCoast == -1 || cost < smallerCoast)
                 {
-                    item = _item;
+                    items.Clear();
+                    items.Add(_item);
                     smallerCoast = cost;
+                }
+                else if (smallerCoast == cost)
+                {
+                    items.Add(_item);
                 }
             }
         }
-
-        if (item == null)
-            return;
-
-        UpdatePosition(item);
-
-        if (item == grid.endItem)
-        {
-            CancelInvoke();
-            grid.StopPathfinding();
-        }
+        return items;
     }
 
     public void UpdatePosition(GridItem i)
@@ -90,6 +146,6 @@ public class PlayerController : MonoBehaviour {
         targetPosition = i.transform.position + Vector3.up * defaultPosition.y;
         X = i.X;
         Y = i.Y;
-        path.Add(i);
+        //path.Add(i);
     }
 }
