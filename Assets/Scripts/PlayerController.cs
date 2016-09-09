@@ -106,11 +106,13 @@ public class PlayerController : MonoBehaviour {
             }
             Debug.Log(DebugItems(paths[i]));
         }
-        
-        if(minID != -1)
+
+        if (minID != -1)
         {
             Debug.Log(paths[minID].Count);
         }
+        else
+            Debug.Log("Impossible Path");
         if(minID != -1)
             StartCoroutine(Walk(paths[minID]));
     }
@@ -142,15 +144,40 @@ public class PlayerController : MonoBehaviour {
             {
                 if (i == 0 && j == 0)
                     continue;
-                if(!(X - i >= 0 && X - i < grid.grid.Length && Y - j >=0 && grid.grid.Length > 0 && Y - j < grid.grid[0].Length))
+                /*if(!(X - i >= 0 && X - i < grid.grid.Length && Y - j >=0 && grid.grid.Length > 0 && Y - j < grid.grid[0].Length))
+                    continue;*/
+                if (!IsInsideGrid(X - i, Y - j))
                     continue;
 
                 GridItem _item = grid.grid[X - i][Y - j];
+                int cornerX = X - i + (i == 1 ? -1 : 1);
+                int cornerY = Y - j + (j == 1 ? -1 : 1);
 
-                if (_item.itemType.baseWeight == -1)
+                bool hasBlockingCorner = false;
+                if(IsInsideGrid(X, cornerY))
+                {
+                    GridItem _corner = grid.grid[X][cornerY];
+                    Debug.Log(_corner.itemType.baseWeight);
+                    if (_corner.itemType.baseWeight == -1)
+                        hasBlockingCorner = true;
+                }
+                if (IsInsideGrid(cornerX, Y))
+                {
+                    GridItem _corner = grid.grid[cornerX][Y];
+                    Debug.Log(_corner.itemType.baseWeight);
+                    if (_corner.itemType.baseWeight == -1)
+                        hasBlockingCorner = true;
+                }
+
+                if (hasBlockingCorner)
+                    continue; 
+
+                float weight = _item.itemType.baseWeight;
+                if (weight == -1)
                     continue;
+
                 if (path.Contains(_item))
-                    continue;
+                    weight *= 1.5f;
 
                 int G = Mathf.Abs(i) == Mathf.Abs(j) && Mathf.Abs(i) == 1 ? _item.itemType.baseWeight + 4 : _item.itemType.baseWeight;
                 int cost = G + CalculateH(_item);
@@ -168,6 +195,11 @@ public class PlayerController : MonoBehaviour {
             }
         }
         return items;
+    }
+
+    bool IsInsideGrid(int X, int Y)
+    {
+        return (X >= 0 && X < grid.grid.Length && Y >= 0 && grid.grid.Length > 0 && Y < grid.grid[0].Length);
     }
 
     public void UpdatePosition(GridItem i)
