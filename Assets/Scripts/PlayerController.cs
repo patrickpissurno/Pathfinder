@@ -3,6 +3,8 @@ using System.Collections;
 using System.Collections.Generic;
 
 public class PlayerController : MonoBehaviour {
+    public const bool IS_DEBUG = false;
+
     private GridController grid;
     public Vector3 defaultPosition;
     public Vector3 targetPosition;
@@ -53,7 +55,7 @@ public class PlayerController : MonoBehaviour {
         paths.Add(new List<GridItem>());
         paths[0].Add(grid.startItem);
 
-        int EXECUTION_LIMIT = 400;
+        int EXECUTION_LIMIT = IS_DEBUG ? 400 * ((grid.grid.Length / 4 + grid.grid[0].Length / 4)/2) : -1;
 
         bool didChange = true;
         int limit = 0;
@@ -67,7 +69,7 @@ public class PlayerController : MonoBehaviour {
                 if (current == grid.endItem)
                     continue;
                 List<GridItem> nexts = PathFinderStep(current.X, current.Y, path);
-                Debug.Log("NEXTS: " + DebugItems(nexts));
+                Log("NEXTS: " + DebugItems(nexts));
                 for (int i = 0; i < nexts.Count; i++)
                 {
                     List<GridItem> newPath = path;
@@ -81,16 +83,16 @@ public class PlayerController : MonoBehaviour {
                     newPath.Add(nexts[i]);
                     didChange = true;
                     limit++;
-                    if (limit >= EXECUTION_LIMIT)
+                    if (EXECUTION_LIMIT != -1 && limit >= EXECUTION_LIMIT)
                         break;
                 }
             }
             limit++;
-            if (limit >= EXECUTION_LIMIT)
+            if (EXECUTION_LIMIT != -1 && limit >= EXECUTION_LIMIT)
                 break;
         }
 
-        Debug.Log("LIMIT: " + limit);
+        Log("LIMIT: " + limit);
 
         int minCost = -1;
         int minID = -1;
@@ -104,15 +106,15 @@ public class PlayerController : MonoBehaviour {
                 minCost = path.Count;
                 minID = i;
             }
-            Debug.Log(DebugItems(paths[i]));
+            Log(DebugItems(paths[i]));
         }
 
         if (minID != -1)
         {
-            Debug.Log(paths[minID].Count);
+            Log(paths[minID].Count);
         }
         else
-            Debug.Log("Impossible Path");
+            Log("Impossible Path");
         if(minID != -1)
             StartCoroutine(Walk(paths[minID]));
     }
@@ -132,6 +134,14 @@ public class PlayerController : MonoBehaviour {
         foreach (GridItem it in path)
             str += "(" + it.X + "," + it.Y + ")";
         return str;
+    }
+
+    public void Log(int str) { Log(str.ToString()); }
+    public void Log(float str) { Log(str.ToString()); }
+    public void Log(string str)
+    {
+        if(IS_DEBUG)
+            Debug.Log(str);
     }
 
     List<GridItem> PathFinderStep(int X, int Y, List<GridItem> path)
@@ -157,14 +167,14 @@ public class PlayerController : MonoBehaviour {
                 if(IsInsideGrid(X, cornerY))
                 {
                     GridItem _corner = grid.grid[X][cornerY];
-                    Debug.Log(_corner.itemType.baseWeight);
+                    Log(_corner.itemType.baseWeight);
                     if (_corner.itemType.baseWeight == -1)
                         hasBlockingCorner = true;
                 }
                 if (IsInsideGrid(cornerX, Y))
                 {
                     GridItem _corner = grid.grid[cornerX][Y];
-                    Debug.Log(_corner.itemType.baseWeight);
+                    Log(_corner.itemType.baseWeight);
                     if (_corner.itemType.baseWeight == -1)
                         hasBlockingCorner = true;
                 }

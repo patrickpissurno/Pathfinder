@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using UnityEngine.UI;
 using System.Collections;
 using System.Collections.Generic;
 
@@ -6,8 +7,15 @@ public class GridController : MonoBehaviour {
 
     [SerializeField]
     private Transform gridParent;
+
     [SerializeField]
     private PlayerController player;
+
+    [SerializeField]
+    private Slider widthSlider;
+
+    [SerializeField]
+    private Slider heightSlider;
 
     private GameObject canvas;
 
@@ -22,16 +30,12 @@ public class GridController : MonoBehaviour {
     private const float DIST = .1f;
 
     public bool IsSimulating = false;
+    public bool IsUIOpen = true;
 
 	// Use this for initialization
 	void Start () {
         LoadResources();
-        Generate(8, 8);
-	}
-	
-	// Update is called once per frame
-	void Update () {
-	
+        Generate(4, 4);
 	}
 
     private static void LoadResources()
@@ -42,7 +46,8 @@ public class GridController : MonoBehaviour {
 
     public void GridPressed(GridItem i)
     {
-        if (!IsSimulating)
+        #region GridPressed
+        if (!IsSimulating && !IsUIOpen)
         {
             if (i.itemType == GridItem.ITEM_TYPE.DIRT)
                 i.itemType = GridItem.ITEM_TYPE.WALL;
@@ -79,6 +84,7 @@ public class GridController : MonoBehaviour {
             }
             i.Invalidate();
         }
+        #endregion
     }
 
     public void Generate(int width, int height)
@@ -100,6 +106,22 @@ public class GridController : MonoBehaviour {
                 grid[i][j].Y = j;
                 grid[i][j].itemType = GridItem.ITEM_TYPE.DIRT;
                 grid[i][j].Invalidate();
+            }
+        }
+    }
+
+    public void Reset()
+    {
+        gridParent.transform.position = Vector3.zero;
+        foreach (GridItem[] items in grid)
+        {
+            if(items != null)
+            {
+                foreach (GridItem i in items)
+                {
+                    if (i != null)
+                        Destroy(i.gameObject); 
+                }
             }
         }
     }
@@ -128,5 +150,14 @@ public class GridController : MonoBehaviour {
         IsSimulating = false;
         canvas.SetActive(true);
         player.gameObject.SetActive(false);
+    }
+
+    public void SizeChanged(float f)
+    {
+        if (!IsSimulating)
+        {
+            Reset();
+            Generate((int)widthSlider.value, (int)heightSlider.value);
+        }
     }
 }
