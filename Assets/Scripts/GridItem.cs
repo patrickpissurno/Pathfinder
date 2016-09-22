@@ -25,16 +25,25 @@ public class GridItem : MonoBehaviour {
         LoadResources();
         LoadComponents();
         Material m = null;
+        SetHeight(0);
         if (itemType == ITEM_TYPE.DIRT)
             m = Dirt;
         else if (itemType == ITEM_TYPE.WALL)
+        {
             m = Wall;
+            SetHeight(1);
+        }
         else if (itemType == ITEM_TYPE.START)
             m = StartM;
         else if (itemType == ITEM_TYPE.END)
             m = EndM;
         if(m != null)
             renderer.material = m;
+    }
+
+    private void SetHeight(int h)
+    {
+        transform.position = new Vector3(transform.position.x, h * .9f, transform.position.z);
     }
 
     void OnMouseDown()

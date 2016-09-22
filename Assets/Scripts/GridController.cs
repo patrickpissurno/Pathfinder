@@ -17,7 +17,11 @@ public class GridController : MonoBehaviour {
     [SerializeField]
     private Slider heightSlider;
 
+    [SerializeField]
     private GameObject canvas;
+
+    [SerializeField]
+    private GameObject sizeMenuUI;
 
     private static GameObject gridPrefab;
     public GridItem[][] grid;
@@ -130,7 +134,6 @@ public class GridController : MonoBehaviour {
     {
         if (startItem != null && endItem != null)
         {
-            canvas = GameObject.Find("Canvas");
             canvas.SetActive(false);
             //player.transform.position = startItem.transform.position + Vector3.up * player.defaultPosition.y;
             player.UpdatePosition(startItem);
@@ -159,5 +162,12 @@ public class GridController : MonoBehaviour {
             Reset();
             Generate((int)widthSlider.value, (int)heightSlider.value);
         }
+    }
+
+    public void CloseSizeUI()
+    {
+        CameraController.LOCK_CAMERA = false;
+        sizeMenuUI.SetActive(false);
+        IsUIOpen = false;
     }
 }
