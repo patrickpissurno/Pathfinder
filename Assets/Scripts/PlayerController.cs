@@ -2,9 +2,8 @@
 using System.Collections;
 using System.Collections.Generic;
 
-public class PlayerController : MonoBehaviour {
-    public const bool IS_DEBUG = false;
-
+public class PlayerController : MonoBehaviour
+{
     private GridController grid;
     public Vector3 defaultPosition;
     public Vector3 targetPosition;
@@ -17,11 +16,12 @@ public class PlayerController : MonoBehaviour {
 
     private List<List<GridItem>> paths;
 
-	void Start () {
+    void Start()
+    {
         defaultPosition = transform.position;
         gameObject.SetActive(false);
         path = new List<GridItem>();
-	}
+    }
 
     void FixedUpdate()
     {
@@ -55,7 +55,7 @@ public class PlayerController : MonoBehaviour {
         paths.Add(new List<GridItem>());
         paths[0].Add(grid.startItem);
 
-        int EXECUTION_LIMIT = IS_DEBUG ? 400 * ((grid.grid.Length / 4 + grid.grid[0].Length / 4)/2) : -1;
+        int EXECUTION_LIMIT = 5000;
 
         bool didChange = true;
         int limit = 0;
@@ -69,7 +69,7 @@ public class PlayerController : MonoBehaviour {
                 if (current == grid.endItem)
                     continue;
                 List<GridItem> nexts = PathFinderStep(current.X, current.Y, path);
-                Log("NEXTS: " + DebugItems(nexts));
+                Debug.Log("NEXTS: " + DebugItems(nexts));
                 for (int i = 0; i < nexts.Count; i++)
                 {
                     List<GridItem> newPath = path;
@@ -83,39 +83,37 @@ public class PlayerController : MonoBehaviour {
                     newPath.Add(nexts[i]);
                     didChange = true;
                     limit++;
-                    if (EXECUTION_LIMIT != -1 && limit >= EXECUTION_LIMIT)
+                    if (limit >= EXECUTION_LIMIT)
                         break;
                 }
             }
             limit++;
-            if (EXECUTION_LIMIT != -1 && limit >= EXECUTION_LIMIT)
+            if (limit >= EXECUTION_LIMIT)
                 break;
         }
 
-        Log("LIMIT: " + limit);
+        Debug.Log("LIMIT: " + limit);
 
         int minCost = -1;
         int minID = -1;
-        for(int i = 0; i<paths.Count; i++)
+        for (int i = 0; i < paths.Count; i++)
         {
             List<GridItem> path = paths[i];
-            //if (path[path.Count - 1] != grid.endItem)
-            //    continue;
+            if (path[path.Count - 1] != grid.endItem)
+                continue;
             if (minCost == -1 || path.Count < minCost)
             {
                 minCost = path.Count;
                 minID = i;
             }
-            Log(DebugItems(paths[i]));
+            Debug.Log(DebugItems(paths[i]));
         }
 
         if (minID != -1)
         {
-            Log(paths[minID].Count);
+            Debug.Log(paths[minID].Count);
         }
-        else
-            Log("Impossible Path");
-        if(minID != -1)
+        if (minID != -1)
             StartCoroutine(Walk(paths[minID]));
     }
 
@@ -126,6 +124,8 @@ public class PlayerController : MonoBehaviour {
             yield return new WaitForSeconds(.25f);
             UpdatePosition(i);
         }
+        yield return new WaitForSeconds(1f);
+        grid.StopPathfinding();
     }
 
     string DebugItems(List<GridItem> path)
@@ -134,14 +134,6 @@ public class PlayerController : MonoBehaviour {
         foreach (GridItem it in path)
             str += "(" + it.X + "," + it.Y + ")";
         return str;
-    }
-
-    public void Log(int str) { Log(str.ToString()); }
-    public void Log(float str) { Log(str.ToString()); }
-    public void Log(string str)
-    {
-        if(IS_DEBUG)
-            Debug.Log(str);
     }
 
     List<GridItem> PathFinderStep(int X, int Y, List<GridItem> path)
@@ -154,43 +146,41 @@ public class PlayerController : MonoBehaviour {
             {
                 if (i == 0 && j == 0)
                     continue;
-                /*if(!(X - i >= 0 && X - i < grid.grid.Length && Y - j >=0 && grid.grid.Length > 0 && Y - j < grid.grid[0].Length))
-                    continue;*/
                 if (!IsInsideGrid(X - i, Y - j))
                     continue;
 
                 GridItem _item = grid.grid[X - i][Y - j];
-                int cornerX = X - i + (i == 1 ? -1 : 1);
-                int cornerY = Y - j + (j == 1 ? -1 : 1);
-
-                bool hasBlockingCorner = false;
-                if(IsInsideGrid(X, cornerY))
+                if (Mathf.Abs(i) == 1 && Mathf.Abs(j) == 1)
                 {
-                    GridItem _corner = grid.grid[X][cornerY];
-                    Log(_corner.itemType.baseWeight);
-                    if (_corner.itemType.baseWeight == -1)
-                        hasBlockingCorner = true;
-                }
-                if (IsInsideGrid(cornerX, Y))
-                {
-                    GridItem _corner = grid.grid[cornerX][Y];
-                    Log(_corner.itemType.baseWeight);
-                    if (_corner.itemType.baseWeight == -1)
-                        hasBlockingCorner = true;
+                    int cornerX = _item.X + (i == 1 ? -1 : 1);
+                    int cornerY = _item.Y + (j == 1 ? -1 : 1);
+                    bool hasBlockingCorner = false;
+                    if (IsInsideGrid(X, cornerY))
+                    {
+                        GridItem _corner = grid.grid[X][cornerY];
+                        if (_corner.itemType.baseWeight == -1)
+                            hasBlockingCorner = true;
+                    }
+                    if (IsInsideGrid(cornerX, Y))
+                    {
+                        GridItem _corner = grid.grid[cornerX][Y];
+                        if (_corner.itemType.baseWeight == -1)
+                            hasBlockingCorner = true;
+                    }
+                    if (hasBlockingCorner)
+                        continue;
                 }
 
-                if (hasBlockingCorner)
-                    continue; 
-
-                float weight = _item.itemType.baseWeight;
-                if (weight == -1)
+                if (_item.itemType.baseWeight == -1)
                     continue;
-
                 if (path.Contains(_item))
-                    weight *= 1.5f;
+                    continue;
 
                 int G = Mathf.Abs(i) == Mathf.Abs(j) && Mathf.Abs(i) == 1 ? _item.itemType.baseWeight + 4 : _item.itemType.baseWeight;
                 int cost = G + CalculateH(_item);
+
+                int deltaH = CalculateH(_item) - CalculateH(X, Y);
+
 
                 if (smallerCoast == -1 || cost < smallerCoast)
                 {
@@ -198,7 +188,7 @@ public class PlayerController : MonoBehaviour {
                     items.Add(_item);
                     smallerCoast = cost;
                 }
-                else if (smallerCoast == cost)
+                else if (smallerCoast == cost)// || deltaH > 0)
                 {
                     items.Add(_item);
                 }
@@ -207,16 +197,16 @@ public class PlayerController : MonoBehaviour {
         return items;
     }
 
-    bool IsInsideGrid(int X, int Y)
-    {
-        return (X >= 0 && X < grid.grid.Length && Y >= 0 && grid.grid.Length > 0 && Y < grid.grid[0].Length);
-    }
-
     public void UpdatePosition(GridItem i)
     {
         targetPosition = i.transform.position + Vector3.up * defaultPosition.y;
         X = i.X;
         Y = i.Y;
         //path.Add(i);
+    }
+
+    bool IsInsideGrid(int X, int Y)
+    {
+        return (X >= 0 && X < grid.grid.Length && Y >= 0 && grid.grid.Length > 0 && Y < grid.grid[0].Length);
     }
 }
