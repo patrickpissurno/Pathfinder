@@ -51,7 +51,8 @@ public class GridItem : MonoBehaviour {
 
     void OnMouseDown()
     {
-        father.GridPressed(this);
+        if(!Input.GetKey(KeyCode.LeftAlt))
+            father.GridPressed(this);
     }
 
     void LoadResources()

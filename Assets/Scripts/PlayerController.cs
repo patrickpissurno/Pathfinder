@@ -12,15 +12,15 @@ public class PlayerController : MonoBehaviour
     public int X;
     public int Y;
 
-    private List<GridItem> path;
+    private Path path;
 
-    private List<List<GridItem>> paths;
+    private List<Path> paths;
 
     void Start()
     {
         defaultPosition = transform.position;
         gameObject.SetActive(false);
-        path = new List<GridItem>();
+        path = new Path();
     }
 
     void FixedUpdate()
@@ -49,10 +49,10 @@ public class PlayerController : MonoBehaviour
 
     void CalculatePaths()
     {
-        paths = new List<List<GridItem>>();
+        paths = new List<Path>();
         int X = grid.startItem.X;
         int Y = grid.startItem.Y;
-        paths.Add(new List<GridItem>());
+        paths.Add(new Path());
         paths[0].Add(grid.startItem);
 
         int EXECUTION_LIMIT = 5000;
@@ -62,22 +62,24 @@ public class PlayerController : MonoBehaviour
         while (didChange)
         {
             didChange = false;
-            List<GridItem>[] _paths = paths.ToArray();
-            foreach (List<GridItem> path in _paths)
+            Path[] _paths = paths.ToArray();
+            foreach (Path path in _paths)
             {
-                GridItem current = path[path.Count - 1];
+                GridItem current = path.steps[path.Size() - 1];
                 if (current == grid.endItem)
                     continue;
                 List<GridItem> nexts = PathFinderStep(current.X, current.Y, path);
                 Debug.Log("NEXTS: " + DebugItems(nexts));
                 for (int i = 0; i < nexts.Count; i++)
                 {
-                    List<GridItem> newPath = path;
+                    Path newPath = path;
                     if (newPath.Contains(nexts[i]))
                         continue;
                     if (i != nexts.Count - 1)
                     {
-                        paths.Add(new List<GridItem>(path));
+                        Path p = new Path();
+                        p.steps = new List<GridItem>(path.steps);
+                        paths.Add(p);
                         newPath = paths[paths.Count - 1];
                     }
                     newPath.Add(nexts[i]);
@@ -98,28 +100,28 @@ public class PlayerController : MonoBehaviour
         int minID = -1;
         for (int i = 0; i < paths.Count; i++)
         {
-            List<GridItem> path = paths[i];
-            if (path[path.Count - 1] != grid.endItem)
+            Path path = paths[i];
+            if (path.steps[path.Size() - 1] != grid.endItem)
                 continue;
-            if (minCost == -1 || path.Count < minCost)
+            if (minCost == -1 || path.Size() < minCost)
             {
-                minCost = path.Count;
+                minCost = path.Size();
                 minID = i;
             }
-            Debug.Log(DebugItems(paths[i]));
+            Debug.Log(DebugItems(paths[i].steps));
         }
 
         if (minID != -1)
         {
-            Debug.Log(paths[minID].Count);
+            Debug.Log(paths[minID].Size());
         }
         if (minID != -1)
             StartCoroutine(Walk(paths[minID]));
     }
 
-    IEnumerator Walk(List<GridItem> path)
+    IEnumerator Walk(Path path)
     {
-        foreach (GridItem i in path)
+        foreach (GridItem i in path.steps)
         {
             yield return new WaitForSeconds(.25f);
             UpdatePosition(i);
@@ -136,7 +138,7 @@ public class PlayerController : MonoBehaviour
         return str;
     }
 
-    List<GridItem> PathFinderStep(int X, int Y, List<GridItem> path)
+    List<GridItem> PathFinderStep(int X, int Y, Path path)
     {
         int smallerCoast = -1;
         List<GridItem> items = new List<GridItem>();
@@ -208,5 +210,42 @@ public class PlayerController : MonoBehaviour
     bool IsInsideGrid(int X, int Y)
     {
         return (X >= 0 && X < grid.grid.Length && Y >= 0 && grid.grid.Length > 0 && Y < grid.grid[0].Length);
+    }
+
+    private class ItemCost
+    {
+        public GridItem gridItem;
+        public int cost;
+    }
+
+    private class Path
+    {
+        public List<GridItem> steps;
+        public int coast;
+
+        public Path()
+        {
+            steps = new List<GridItem>();
+        }
+
+        public int Size()
+        {
+            return steps.Count;
+        }
+
+        public bool Contains(GridItem item)
+        {
+            return steps.Contains(item);
+        }
+
+        public void Add(GridItem item)
+        {
+            steps.Add(item);
+        }
+
+        public void Clear()
+        {
+            steps.Clear();
+        }
     }
 }

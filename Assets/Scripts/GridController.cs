@@ -23,6 +23,9 @@ public class GridController : MonoBehaviour {
     [SerializeField]
     private GameObject sizeMenuUI;
 
+    [SerializeField]
+    private GameObject mapMenuUI;
+
     private static GameObject gridPrefab;
     public GridItem[][] grid;
 
@@ -180,6 +183,20 @@ public class GridController : MonoBehaviour {
         player.gameObject.SetActive(false);
     }
 
+    public void ClearGrid()
+    {
+        foreach (GridItem[] g in grid)
+        {
+            foreach (GridItem i in g)
+            {
+                i.itemType = GridItem.ITEM_TYPE.DIRT;
+                i.Invalidate();
+            }
+        }
+        startItem = null;
+        endItem = null;
+    }
+
     public void SizeChanged(float f)
     {
         if (!IsSimulating)
@@ -193,6 +210,7 @@ public class GridController : MonoBehaviour {
     {
         CameraController.LOCK_CAMERA = false;
         sizeMenuUI.SetActive(false);
+        mapMenuUI.SetActive(true);
         IsUIOpen = false;
     }
 }
