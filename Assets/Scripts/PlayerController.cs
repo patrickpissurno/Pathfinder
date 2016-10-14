@@ -68,12 +68,12 @@ public class PlayerController : MonoBehaviour
                 GridItem current = path.steps[path.Size() - 1];
                 if (current == grid.endItem)
                     continue;
-                List<GridItem> nexts = PathFinderStep(current.X, current.Y, path);
+                List<ItemCost> nexts = PathFinderStep(current.X, current.Y, path);
                 Debug.Log("NEXTS: " + DebugItems(nexts));
                 for (int i = 0; i < nexts.Count; i++)
                 {
                     Path newPath = path;
-                    if (newPath.Contains(nexts[i]))
+                    if (newPath.Contains(nexts[i].gridItem))
                         continue;
                     if (i != nexts.Count - 1)
                     {
@@ -82,7 +82,8 @@ public class PlayerController : MonoBehaviour
                         paths.Add(p);
                         newPath = paths[paths.Count - 1];
                     }
-                    newPath.Add(nexts[i]);
+                    newPath.Add(nexts[i].gridItem);
+                    newPath.cost += nexts[i].cost;
                     didChange = true;
                     limit++;
                     if (limit >= EXECUTION_LIMIT)
@@ -103,9 +104,9 @@ public class PlayerController : MonoBehaviour
             Path path = paths[i];
             if (path.steps[path.Size() - 1] != grid.endItem)
                 continue;
-            if (minCost == -1 || path.Size() < minCost)
+            if (minCost == -1 || path.cost < minCost)
             {
-                minCost = path.Size();
+                minCost = path.cost;
                 minID = i;
             }
             Debug.Log(DebugItems(paths[i].steps));
@@ -113,7 +114,7 @@ public class PlayerController : MonoBehaviour
 
         if (minID != -1)
         {
-            Debug.Log(paths[minID].Size());
+            Debug.Log(paths[minID].cost);
         }
         if (minID != -1)
             StartCoroutine(Walk(paths[minID]));
@@ -138,10 +139,18 @@ public class PlayerController : MonoBehaviour
         return str;
     }
 
-    List<GridItem> PathFinderStep(int X, int Y, Path path)
+    string DebugItems(List<ItemCost> path)
+    {
+        string str = "";
+        foreach (ItemCost it in path)
+            str += "(" + it.gridItem.X + "," + it.gridItem.Y + ")";
+        return str;
+    }
+
+    List<ItemCost> PathFinderStep(int X, int Y, Path path)
     {
         int smallerCoast = -1;
-        List<GridItem> items = new List<GridItem>();
+        List<ItemCost> items = new List<ItemCost>();
         for (int i = -1; i <= 1; i++)
         {
             for (int j = -1; j <= 1; j++)
@@ -187,12 +196,12 @@ public class PlayerController : MonoBehaviour
                 if (smallerCoast == -1 || cost < smallerCoast)
                 {
                     items.Clear();
-                    items.Add(_item);
+                    items.Add(new ItemCost(_item, cost));
                     smallerCoast = cost;
                 }
                 else if (smallerCoast == cost)// || deltaH > 0)
                 {
-                    items.Add(_item);
+                    items.Add(new ItemCost(_item, cost));
                 }
             }
         }
@@ -216,12 +225,17 @@ public class PlayerController : MonoBehaviour
     {
         public GridItem gridItem;
         public int cost;
+        public ItemCost(GridItem item, int cost)
+        {
+            this.gridItem = item;
+            this.cost = cost;
+        }
     }
 
     private class Path
     {
         public List<GridItem> steps;
-        public int coast;
+        public int cost;
 
         public Path()
         {
