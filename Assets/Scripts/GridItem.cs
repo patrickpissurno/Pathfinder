@@ -3,6 +3,7 @@ using System.Collections;
 
 public class GridItem : MonoBehaviour {
     private static Material Dirt = null;
+    private static Material Water = null;
     private static Material Wall = null;
     private static Material StartM = null;
     private static Material EndM = null;
@@ -28,6 +29,8 @@ public class GridItem : MonoBehaviour {
         SetHeight(0);
         if (itemType == ITEM_TYPE.DIRT)
             m = Dirt;
+        else if (itemType == ITEM_TYPE.WATER)
+            m = Water;
         else if (itemType == ITEM_TYPE.WALL)
         {
             m = Wall;
@@ -57,6 +60,8 @@ public class GridItem : MonoBehaviour {
             Dirt = Resources.Load<Material>("Materials/Dirt");
         if (Wall == null)
             Wall = Resources.Load<Material>("Materials/Wall");
+        if (Water == null)
+            Water = Resources.Load<Material>("Materials/Water");
         if (StartM == null)
             StartM = Resources.Load<Material>("Materials/Start");
         if (EndM == null)
@@ -80,9 +85,11 @@ public class GridItem : MonoBehaviour {
     public static class ITEM_TYPE
     {
         public static Item DIRT = new Item(10);
+        public static Item WATER = new Item(15);
         public static Item WALL = new Item(-1);
         public static Item START = new Item(-1);
         public static Item END = new Item(10);
+        public static Item[] ITEMS = new Item[] { DIRT, WATER, WALL, START, END };
         public class Item
         {
             public int baseWeight = 10;

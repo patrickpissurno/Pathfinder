@@ -48,45 +48,70 @@ public class GridController : MonoBehaviour {
             gridPrefab = Resources.Load<GameObject>("Prefabs/Cube");
     }
 
-    public void GridPressed(GridItem i)
+    public void GridPressed(GridItem item)
     {
         #region GridPressed
         if (!IsSimulating && !IsUIOpen)
         {
-            if (i.itemType == GridItem.ITEM_TYPE.DIRT)
-                i.itemType = GridItem.ITEM_TYPE.WALL;
-            else if (i.itemType == GridItem.ITEM_TYPE.WALL)
+            for (int i = 0; i < GridItem.ITEM_TYPE.ITEMS.Length; i++)
             {
-                if (startItem == null)
+                GridItem.ITEM_TYPE.Item type = GridItem.ITEM_TYPE.ITEMS[i];
+                if (item.itemType.Equals(type))
                 {
-                    i.itemType = GridItem.ITEM_TYPE.START;
-                    startItem = i;
+                    bool foundNext = false;
+                    GridItem.ITEM_TYPE.Item nextItem = null;
+                    if (item == startItem)
+                        startItem = null;
+                    if (item == endItem)
+                        endItem = null;
+
+                    while(!foundNext)
+                    {
+                        int next = i + 1;
+                        if (next >= GridItem.ITEM_TYPE.ITEMS.Length)
+                            next = 0;
+                        nextItem = GridItem.ITEM_TYPE.ITEMS[next];
+                        if (nextItem.Equals(GridItem.ITEM_TYPE.START))
+                        {
+                            if (startItem != null)
+                            {
+                                i++;
+                                continue;
+                            }
+                            else
+                            {
+                                startItem = item;
+                                foundNext = true;
+                                break;
+                            }
+
+                        }
+                        else if (nextItem.Equals(GridItem.ITEM_TYPE.END))
+                        {
+                            if (endItem != null)
+                            {
+                                i++;
+                                continue;
+                            }
+                            else
+                            {
+                                endItem = item;
+                                foundNext = true;
+                                break;
+                            }
+
+                        }
+                        else
+                        {
+                            foundNext = true;
+                            break;
+                        }
+                    }
+                    item.itemType = nextItem;
+                    item.Invalidate();
+                    break;
                 }
-                else if (endItem == null)
-                {
-                    i.itemType = GridItem.ITEM_TYPE.END;
-                    endItem = i;
-                }
-                else
-                    i.itemType = GridItem.ITEM_TYPE.DIRT;
             }
-            else if (i.itemType == GridItem.ITEM_TYPE.START)
-            {
-                if (endItem == null)
-                {
-                    i.itemType = GridItem.ITEM_TYPE.END;
-                    endItem = i;
-                }
-                else
-                    i.itemType = GridItem.ITEM_TYPE.DIRT;
-                startItem = null;
-            }
-            else if (i.itemType == GridItem.ITEM_TYPE.END)
-            {
-                i.itemType = GridItem.ITEM_TYPE.DIRT;
-                endItem = null;
-            }
-            i.Invalidate();
         }
         #endregion
     }
