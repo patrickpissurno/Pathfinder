@@ -122,10 +122,11 @@ public class PlayerController : MonoBehaviour
 
     IEnumerator Walk(Path path)
     {
+        yield return new WaitForSeconds(.25f);
         foreach (GridItem i in path.steps)
         {
-            yield return new WaitForSeconds(.25f);
             UpdatePosition(i);
+            yield return new WaitForSeconds(.25f * (i.itemType.baseWeight/GridItem.ITEM_TYPE.DIRT.baseWeight));
         }
         yield return new WaitForSeconds(1f);
         grid.StopPathfinding();

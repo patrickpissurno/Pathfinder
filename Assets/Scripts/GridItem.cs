@@ -86,7 +86,7 @@ public class GridItem : MonoBehaviour {
     public static class ITEM_TYPE
     {
         public static Item DIRT = new Item(10);
-        public static Item WATER = new Item(15);
+        public static Item WATER = new Item(20);
         public static Item WALL = new Item(-1);
         public static Item START = new Item(-1);
         public static Item END = new Item(10);
