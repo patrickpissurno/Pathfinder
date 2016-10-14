@@ -34,7 +34,7 @@ public class PlayerController : MonoBehaviour
         CancelInvoke();
         path.Clear();
         //InvokeRepeating("PathFinderStep", 1f, 1f);
-        CalculatePaths();
+        StartCoroutine(CalculatePaths());
     }
 
     int CalculateH(GridItem i)
@@ -47,7 +47,7 @@ public class PlayerController : MonoBehaviour
         return H = (Mathf.Abs(grid.endItem.X - X) + Mathf.Abs(grid.endItem.Y - Y)) * 10;
     }
 
-    void CalculatePaths()
+    IEnumerator CalculatePaths()
     {
         paths = new List<Path>();
         int X = grid.startItem.X;
@@ -90,6 +90,7 @@ public class PlayerController : MonoBehaviour
                         break;
                 }
             }
+            yield return new WaitForSeconds(0.001f);
             limit++;
             if (limit >= EXECUTION_LIMIT)
                 break;
