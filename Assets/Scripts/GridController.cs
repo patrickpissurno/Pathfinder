@@ -34,7 +34,7 @@ public class GridController : MonoBehaviour {
     [HideInInspector]
     public GridItem endItem = null;
 
-    private const float DIST = .1f;
+    private const float DIST = .05f;
 
     public bool IsSimulating = false;
     public bool IsUIOpen = true;
@@ -123,7 +123,7 @@ public class GridController : MonoBehaviour {
     {
         Vector3 basePos = gridParent.transform.position;
         basePos = new Vector3(basePos.x - (width * (1 + DIST) / 2f) + .5f, basePos.y, basePos.z + (height * (1 + DIST) / 2f) - .5f);
-        gridParent.position = basePos;
+        //gridParent.position = basePos;
         grid = new GridItem[width][];
         for (int i = 0; i < width; i++)
         {
@@ -165,10 +165,11 @@ public class GridController : MonoBehaviour {
             canvas.SetActive(false);
             //player.transform.position = startItem.transform.position + Vector3.up * player.defaultPosition.y;
             player.UpdatePosition(startItem);
-            player.transform.position = player.targetPosition;
+            player.transform.localPosition = player.targetPosition;
             player.X = startItem.X;
             player.Y = startItem.Y;
             player.gameObject.SetActive(true);
+            player.transform.SetParent(gridParent);
             IsSimulating = true;
             player.StartPathfind(this);
         }
@@ -212,5 +213,13 @@ public class GridController : MonoBehaviour {
         sizeMenuUI.SetActive(false);
         mapMenuUI.SetActive(true);
         IsUIOpen = false;
+    }
+
+    public void OpenSizeUI()
+    {
+        CameraController.LOCK_CAMERA = true;
+        sizeMenuUI.SetActive(true);
+        mapMenuUI.SetActive(false);
+        IsUIOpen = true;
     }
 }

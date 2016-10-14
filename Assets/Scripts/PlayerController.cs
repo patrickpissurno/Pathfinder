@@ -25,7 +25,7 @@ public class PlayerController : MonoBehaviour
 
     void FixedUpdate()
     {
-        transform.position = Vector3.Lerp(transform.position, targetPosition, .25f);
+        transform.localPosition = Vector3.Lerp(transform.localPosition, targetPosition, .25f);
     }
 
     public void StartPathfind(GridController grid)
@@ -211,7 +211,7 @@ public class PlayerController : MonoBehaviour
 
     public void UpdatePosition(GridItem i)
     {
-        targetPosition = i.transform.position + Vector3.up * defaultPosition.y;
+        targetPosition = i.transform.localPosition + Vector3.up * (defaultPosition.y + (i.itemType == GridItem.ITEM_TYPE.WATER ? -.5f : 0));
         X = i.X;
         Y = i.Y;
         //path.Add(i);

@@ -7,6 +7,7 @@ public class GridItem : MonoBehaviour {
     private static Material Wall = null;
     private static Material StartM = null;
     private static Material EndM = null;
+    private static GameObject WaterFX = null;
 
     public GridController father;
     public ITEM_TYPE.Item itemType = ITEM_TYPE.DIRT;
@@ -14,6 +15,8 @@ public class GridItem : MonoBehaviour {
     public int Y;
 
     private MeshRenderer renderer;
+
+    private GameObject fx = null;
 
     void Start()
     {
@@ -27,10 +30,16 @@ public class GridItem : MonoBehaviour {
         LoadComponents();
         Material m = null;
         SetHeight(0);
+        if (fx != null)
+            Destroy(fx);
         if (itemType == ITEM_TYPE.DIRT)
             m = Dirt;
         else if (itemType == ITEM_TYPE.WATER)
+        {
             m = Water;
+            fx = Instantiate(WaterFX, transform.position + (Vector3.up * .49f), Quaternion.Euler(90,transform.rotation.eulerAngles.y,0)) as GameObject;
+            fx.transform.SetParent(transform);
+        }
         else if (itemType == ITEM_TYPE.WALL)
         {
             m = Wall;
@@ -51,7 +60,7 @@ public class GridItem : MonoBehaviour {
 
     void OnMouseDown()
     {
-        if(!Input.GetKey(KeyCode.LeftAlt))
+        if (!Input.GetMouseButton(2) && !Input.GetKey(KeyCode.LeftAlt))
             father.GridPressed(this);
     }
 
@@ -67,6 +76,8 @@ public class GridItem : MonoBehaviour {
             StartM = Resources.Load<Material>("Materials/Start");
         if (EndM == null)
             EndM = Resources.Load<Material>("Materials/End");
+        if (WaterFX == null)
+            WaterFX = Resources.Load<GameObject>("Prefabs/WaterFX");
     }
 
     void LoadComponents()
