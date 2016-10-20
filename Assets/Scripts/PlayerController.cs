@@ -55,7 +55,9 @@ public class PlayerController : MonoBehaviour
         paths.Add(new Path());
         paths[0].Add(grid.startItem);
 
-        int EXECUTION_LIMIT = 5000;
+        int EXECUTION_LIMIT = 15000;
+
+        grid.DebugText("Please wait a little while I look for a path.");
 
         bool didChange = true;
         int limit = 0;
@@ -119,10 +121,16 @@ public class PlayerController : MonoBehaviour
         }
         if (minID != -1)
             StartCoroutine(Walk(paths[minID]));
+        else
+        {
+            grid.StopPathfinding();
+            grid.DebugText("Sorry, but I couldn't find a way to the objective. The path seems impossible.");
+        }
     }
 
     IEnumerator Walk(Path path)
     {
+        grid.DebugClear();
         yield return new WaitForSeconds(.25f);
         foreach (GridItem i in path.steps)
         {

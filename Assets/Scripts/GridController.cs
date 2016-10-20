@@ -29,6 +29,9 @@ public class GridController : MonoBehaviour {
     private static GameObject gridPrefab;
     public GridItem[][] grid;
 
+    [SerializeField]
+    private Text debug;
+
     [HideInInspector]
     public GridItem startItem = null;
     [HideInInspector]
@@ -174,7 +177,7 @@ public class GridController : MonoBehaviour {
             player.StartPathfind(this);
         }
         else
-            Debug.Log("You must set the starting point and the ending point for the pathfind to work");
+            DebugText("I need you to set at least the starting and ending point to find a path.");
     }
 
     public void StopPathfinding()
@@ -222,4 +225,17 @@ public class GridController : MonoBehaviour {
         mapMenuUI.SetActive(false);
         IsUIOpen = true;
     }
+
+    public void DebugText(string str)
+    {
+        debug.text = str;
+        if (str != "")
+            Debug.Log(str);
+    }
+
+    public void DebugClear()
+    {
+        DebugText("");
+    }
+
 }
